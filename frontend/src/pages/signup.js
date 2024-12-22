@@ -3,12 +3,9 @@ import { useMutation, useApolloClient, gql } from '@apollo/client';
 import UserForm from '../Screen/UserForm';
 import { isLoggedInVar } from '../cache';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { SIGNUP_USER } from '../gql/mutation';
 
-const SIGNUP_USER = gql`
-mutation signUp($email: String!, $username: String!, $password: String!) {
-  signUp(email: $email, username: $username, password: $password)
-}
-`;
 
 
 // include the props passed to the component for later use
@@ -24,10 +21,17 @@ const SignUp = () => {
             localStorage.setItem('token', data.signUp);
             // update the local cache
             isLoggedInVar(true);
+            toast("Successfully Loged In", { type: "success" });
+            
             // client.writeData({ data: { isLoggedIn: true } });
             // redirect the user to the homepage
             navigate('/');
-        }
+        },
+        onError: error => {
+                    console.log(error);
+                    toast(`${error.message}`, { type: "error" });
+                            
+                } 
     });
 
     useEffect(() => {
@@ -40,7 +44,7 @@ const SignUp = () => {
             {/* if the data is loading, display a loading message*/}
             {loading && <p>Loading...</p>}
             {/* if there is an error, display a error message*/}
-            {error && <p>Error creating an account!</p>}
+            {/* {error && <p>Error creating an account!</p>} */}
         </React.Fragment>
     );
 };

@@ -54,23 +54,9 @@
 import React from "react";
 import { gql, useQuery } from '@apollo/client';
 import styled from 'styled-components';
+import BackButton from "../components/BackButton";
+import { GET_PROFILE } from "../gql/query";
 
-// GraphQL query to fetch user data
-const GET_ME = gql`
-query{
-  me {
-    username
-    highScore
-    email
-    achievements {
-      id
-      name
-      unlockedAt
-      description
-    }
-  }
-}
-`;
 
 const Home = styled.div`
   height: 100vh;
@@ -143,7 +129,7 @@ const Achievement = styled.div`
 `;
 
 const MyProfile = () => {
-    const { loading, error, data } = useQuery(GET_ME);
+    const { loading, error, data } = useQuery(GET_PROFILE);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error!</p>;
@@ -152,6 +138,9 @@ const MyProfile = () => {
 
       <Home>
         <Container>
+        <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+                    <BackButton />
+                </div>
         <ProfileContainer>
             {/* Displaying user avatar */}
             <Avatar src={data.me.avatar} alt="User Avatar" />

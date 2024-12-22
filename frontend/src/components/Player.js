@@ -6,6 +6,7 @@ display: flex;
   justify-content: space-between; 
   padding: 10px;
   margin: auto;
+  
 `;
 
 const P = styled.p`

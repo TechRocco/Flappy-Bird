@@ -41,6 +41,7 @@ const typeDefs = gql`
         unlockAchievement(playerId: ID!, achievement: String!, description: String!, score: Int!): Player!
         startGame(playerId: ID!): GameSession!
         endGame(sessionId: ID!, score: Int!): GameSession!
+        createOrUpdatePlayer(username: String!, , score: Int!, email: String!, password: String!): Player!
     }
 
     type Subscription {

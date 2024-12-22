@@ -1,6 +1,9 @@
 import { makeVar, InMemoryCache } from '@apollo/client';
 
-export const isLoggedInVar = makeVar(false); // Default value is false
+
+const isLoggedInFromStorage = localStorage.getItem('token') ? true : false;
+
+export const isLoggedInVar = makeVar(isLoggedInFromStorage); // Default value is false
 
 const cache = new InMemoryCache({
     typePolicies: {

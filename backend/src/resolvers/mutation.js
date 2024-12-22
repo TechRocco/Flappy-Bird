@@ -55,7 +55,7 @@ module.exports = {
             return token;
         } catch (err) {
             console.log('Error creating account:', err);
-            throw new Error('Error creating account. Please try again.');
+            throw new Error(`Error creating account: ${err.message}`);
         }
     },
 
@@ -69,15 +69,30 @@ module.exports = {
         });
         // if no user is found, throw an authentication error
         if (!user) {
-            throw new AuthenticationError('Error signing in');
+            throw new AuthenticationError('User not found');
         }
         // if the passwords don't match, throw an authentication error
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
-            throw new AuthenticationError('Error signing in');
+            throw new AuthenticationError('Incorrect Password');
         }
         // create and return the json web token
         return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    },
+
+    createOrUpdatePlayer: async(_, {username, score, email, password}) => {
+      let player = await Player.findOne({ username });
+
+      if (player) {
+        if (score > player.highScore) {
+          player.highScore = score;
+          await player.save();  // Save the updated player
+        }
+      } else {
+        player = await Player.create({ username, highScore: score, email, password });
+      }
+    
+      return player;
     },
 
     updateHighScore: async (_, { playerId, score }) => {
@@ -88,9 +103,6 @@ module.exports = {
             player.highScore = score;
             await player.save();
 
-            // Publish leaderboard updates
-            //   const topPlayers = await Player.find().sort({ highScore: -1 }).limit(10);
-            //   pubsub.publish(LEADERBOARD_UPDATES, { leaderboardUpdates: topPlayers });
         }
         return player;
     },

@@ -1,7 +1,12 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-import GameOver from "./GameOver";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../components/BackButton";
+import { gql, useQuery } from "@apollo/client";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { GET_ME } from "../gql/query";
+
 
 const BIRD_HEIGHT = 28;
 const BIRD_WIDTH = 33;
@@ -9,8 +14,11 @@ const WALL_HEIGHT = 600;
 const WALL_WIDTH = 400;
 const GRAVITY = 8;
 const OBJ_WIDTH = 52;
-const OBJ_SPEED = 6;
-const OBJ_GAP = 200;
+const INITIAL_OBJ_SPEED = 6;
+const INITIAL_OBJ_GAP = 200;
+
+
+
 function GameScreen() {
   const navigate = useNavigate();
   const [isStart, setIsStart] = useState(false);
@@ -18,7 +26,62 @@ function GameScreen() {
   const [objHeight, setObjHeight] = useState(0);
   const [objPos, setObjPos] = useState(WALL_WIDTH);
   const [score, setScore] = useState(0);
+
+  const [objSpeed, setObjSpeed] = useState(INITIAL_OBJ_SPEED);
+  const [objGap, setObjGap] = useState(INITIAL_OBJ_GAP);
+  const { data: userdata } = useQuery(GET_ME);
+
+  // Track milestones and high score
+  const [hasNotifiedMilestone, setHasNotifiedMilestone] = useState(false);
+  const [hasNotifiedHighScore, setHasNotifiedHighScore] = useState(false);
+
+
+  // Start game and control bird's movement when spacebar is pressed or mouse click is detected
   useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.code === "Space" || event.code === "ArrowUp") {
+        // If the game is not started yet, start the game
+        if (!isStart) {
+          setIsStart(true);
+        } else if (birdpos < BIRD_HEIGHT) {
+          setBirspos(0); // Prevent bird from going out of bounds
+        } else {
+          setBirspos((birdpos) => birdpos - 50); // Make bird go up
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isStart, birdpos]);
+
+  // Start game on mouse click
+  const handleMouseClick = () => {
+    if (!isStart) {
+      setIsStart(true);  // Start the game when clicked
+    } else if (birdpos < BIRD_HEIGHT) {
+      setBirspos(0);  // Prevent bird from going out of bounds
+    } else {
+      setBirspos((birdpos) => birdpos - 50);  // Make bird go up on click
+    }
+  };
+
+  // Adjust speed and gap after certain score thresholds
+  useEffect(() => {
+    if (score >= 10 && score < 20) {
+      setObjSpeed(8);  // Speed increases after score reaches 10
+      setObjGap(150);   // Gap decreases after score reaches 10
+    } else if (score >= 20) {
+      setObjSpeed(10); // Speed increases further after score reaches 20
+      setObjGap(100);   // Gap decreases further after score reaches 20
+    }
+  }, [score]);
+
+  useEffect(() => {
+    // Gravity effect - bird continuously falls due to gravity
     let intVal;
     if (isStart && birdpos < WALL_HEIGHT - BIRD_HEIGHT) {
       intVal = setInterval(() => {
@@ -26,13 +89,13 @@ function GameScreen() {
       }, 24);
     }
     return () => clearInterval(intVal);
-  });
+  }, [isStart, birdpos]);
 
   useEffect(() => {
     let objval;
     if (isStart && objPos >= -OBJ_WIDTH) {
       objval = setInterval(() => {
-        setObjPos((objPos) => objPos - OBJ_SPEED);
+        setObjPos((objPos) => objPos - objSpeed);
       }, 24);
 
       return () => {
@@ -40,17 +103,23 @@ function GameScreen() {
       };
     } else {
       setObjPos(WALL_WIDTH);
-      setObjHeight(Math.floor(Math.random() * (WALL_HEIGHT - OBJ_GAP)));
+      setObjHeight(Math.floor(Math.random() * (WALL_HEIGHT - objGap)));
       if (isStart) setScore((score) => score + 1);
     }
-  }, [isStart, objPos]);
+  }, [isStart, objPos, objSpeed, objGap]);
 
   useEffect(() => {
+    // Check for collision with the ceiling or floor
+    if (birdpos <= 0 || birdpos >= WALL_HEIGHT - BIRD_HEIGHT) {
+      navigate('/gameover', { state: { score } });
+    }
+
+    // Check for collision with the object pipes
     let topObj = birdpos >= 0 && birdpos < objHeight;
     let bottomObj =
       birdpos <= WALL_HEIGHT &&
       birdpos >=
-        WALL_HEIGHT - (WALL_HEIGHT - OBJ_GAP - objHeight) - BIRD_HEIGHT;
+      WALL_HEIGHT - (WALL_HEIGHT - objGap - objHeight) - BIRD_HEIGHT;
 
     if (
       objPos >= OBJ_WIDTH &&
@@ -58,21 +127,50 @@ function GameScreen() {
       (topObj || bottomObj)
     ) {
       navigate('/gameover', { state: { score } });
-      // setIsStart(false);
-      // setBirspos(300);
-      // setScore(0);
     }
-  }, [isStart, birdpos, objHeight, objPos]);
-  const handler = () => {
-    if (!isStart) setIsStart(true);
-    else if (birdpos < BIRD_HEIGHT) setBirspos(0);
-    else setBirspos((birdpos) => birdpos - 50);
-  };
+  }, [isStart, birdpos, objHeight, objPos, objGap]);
+
+  useEffect(() => {
+    let highScore;
+    if (navigator.onLine) {
+      highScore = userdata?.me?.highScore;
+    } else {
+      const storedUsername = localStorage.getItem('username');
+      const storedScores = JSON.parse(localStorage.getItem('scores')) || {};
+      highScore = storedScores[storedUsername]?.score;
+    }
+
+    if (score > highScore && !hasNotifiedHighScore) {
+      toast("🔥 New High Score!", { type: "info" });
+      setHasNotifiedHighScore(true);
+    }
+
+
+    if (navigator.onLine) {
+      if (score === 5 && score > highScore && !hasNotifiedMilestone) {
+        toast("🎉 Bronze Badge Achieved!", { type: "success" });
+        setHasNotifiedMilestone(true);
+      } else if (score === 10 && score > highScore && !hasNotifiedMilestone) {
+        toast("🥈 Silver Badge Achieved!", { type: "success" });
+        setHasNotifiedMilestone(true);
+      } else if (score === 15 && score > highScore && !hasNotifiedMilestone) {
+        toast("🥇 Gold Badge Achieved!", { type: "success" });
+        setHasNotifiedMilestone(true);
+      }
+    }
+
+
+  }, [score, userdata, hasNotifiedMilestone, hasNotifiedHighScore]);
+
+
   return (
-    <Home onClick={handler}>
+    <Home onClick={handleMouseClick}>
       <Background height={WALL_HEIGHT} width={WALL_WIDTH}>
-      <ScoreShow>Score: {score}</ScoreShow>
-        {!isStart ? <Startboard>Click To Start</Startboard> : null}
+        <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
+          <BackButton />
+        </div>
+        <ScoreShow>Score: {score}</ScoreShow>
+        {!isStart ? <Startboard>Press Space or Click To Start</Startboard> : null}
         <Obj
           height={objHeight}
           width={OBJ_WIDTH}
@@ -87,10 +185,10 @@ function GameScreen() {
           left={100}
         />
         <Obj
-          height={WALL_HEIGHT - OBJ_GAP - objHeight}
+          height={WALL_HEIGHT - objGap - objHeight}
           width={OBJ_WIDTH}
           left={objPos}
-          top={WALL_HEIGHT - (objHeight + (WALL_HEIGHT - OBJ_GAP - objHeight))}
+          top={WALL_HEIGHT - (objHeight + (WALL_HEIGHT - objGap - objHeight))}
           deg={0}
         />
       </Background>
@@ -106,6 +204,7 @@ const Home = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
 const Background = styled.div`
   background-image: url("./images/background-day.png");
   background-repeat: no-repeat;
@@ -140,12 +239,12 @@ const Obj = styled.div`
 
 const Startboard = styled.div`
   position: relative;
-  top: 49%;
+  top: 35%;
   background-color: black;
   padding: 10px;
-  width: 100px;
+  width: 200px;
   left: 50%;
-  margin-left: -50px;
+  margin-left: -100px;
   text-align: center;
   font-size: 20px;
   border-radius: 10px;

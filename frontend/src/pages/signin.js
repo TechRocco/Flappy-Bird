@@ -1,14 +1,11 @@
-import React, {useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useApolloClient, gql } from '@apollo/client';
 import UserForm from '../Screen/UserForm';
 import { isLoggedInVar } from '../cache';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { SIGNIN_USER } from '../gql/mutation';
 
-const SIGNIN_USER = gql`
- mutation signIn($email: String!, $password: String!) {
-   signIn(email: $email, password: $password)
- }
-`;
 const SignIn = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -20,12 +17,13 @@ const SignIn = () => {
         document.title = 'Sign In — Notedly';
     });
     // const client = useApolloClient();
-    const [signIn, {loading, error }] = useMutation(SIGNIN_USER, {
+    const [signIn, { loading, error }] = useMutation(SIGNIN_USER, {
         onCompleted: data => {
             // console.log(data);
             // store the token
             localStorage.setItem('token', data.signIn);
             isLoggedInVar(true);
+            toast("Successfully Loged In", { type: "success" });
             // update the local cache
             // client.writeData({ data: { isLoggedIn: true } });
             // Redirect to the originally requested route or home
@@ -34,19 +32,21 @@ const SignIn = () => {
 
         onError: error => {
             console.log(error);
-            setErrorMessage(error.message || 'An unexpected error occurred');        }
+            setErrorMessage(error.message || 'An unexpected error occurred');
+            toast(`${error.message}`, { type: "error" });
+                    
+        }
     });
 
-    
-    
+
+
     return (
         <React.Fragment>
-            <UserForm action={signIn} formType="signIn" />
+            
+            {/* {loading && <p>Loading...</p>} */}
+            <UserForm action={signIn} formType="signIn" errorMessage={errorMessage} setErrorMessage={setErrorMessage}/>
             {/* if the data is loading, display a loading message*/}
-            {loading && <p>Loading...</p>}
             {/* if there is an error, display a error message*/}
-            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-            {/* {error && <p>Error signing in!</p>} */}
         </React.Fragment>
     );
 };

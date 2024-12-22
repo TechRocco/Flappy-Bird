@@ -2,26 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from 'react-router-dom';
 import { gql, useMutation, useQuery } from "@apollo/client";
 import styled from "styled-components";
+import HomeButton from "../components/HomeButton";
+import RestartButton from "../components/RestartButton";
+import MessageDisplay from "../components/MessageDisplay";
+import { UPDATE_HIGHSCORE} from "../gql/mutation";
+import { GET_ME } from "../gql/query";
 
-const UPDATE_HIGHSCORE = gql`
-  mutation($playerId: ID!, $score: Int!) {
-    updateHighScore(playerId: $playerId, score: $score) {
-      id
-      username
-      highScore
-    }
-  }
-`;
-
-const GET_ME = gql`
-  query {
-    me {
-      username
-      highScore
-      id
-    }
-  }
-`;
 
 const Home = styled.div`
   height: 100vh;
@@ -64,6 +50,18 @@ const ScoreDiv = styled.div`
   padding: 10px;
 `;
 
+const Buttons = styled.div`
+max-width: 100%;
+  max-height: 300px; 
+  margin: 10% 20%;
+  // border: 2px solid black;
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 40px;
+  ;
+
+`;
+
 const GameOver = () => {
   const location = useLocation();
   const { score } = location.state || {}; // Get score from location state
@@ -71,6 +69,7 @@ const GameOver = () => {
   const { data: userdata } = useQuery(GET_ME);
   
   const [highScore, setHighScore] = useState(null);
+  
   const [updateHighScore, { loading, error }] = useMutation(UPDATE_HIGHSCORE, {
     onCompleted: (data) => {
       // Set high score once mutation completes
@@ -81,8 +80,27 @@ const GameOver = () => {
   // console.log(userdata.me.id);
 
   useEffect(() => {
+    const storedScores = JSON.parse(localStorage.getItem('scores')) || {};
+    const username = localStorage.getItem('username') || 'Guest';
+
+
+
     if (playerId && score !== undefined) {
       updateHighScore({ variables: { playerId, score } });
+    } else if(!navigator.onLine){
+      // Check if there's a saved high score for the current user (guest or otherwise)
+
+    const currentHighScore = storedScores[username]?.score || 0;
+    setHighScore(currentHighScore);
+
+    if (score !== undefined) {
+      // If the new score is higher than the current high score, update it
+      if (score > currentHighScore) {
+        storedScores[username] = { score };
+        localStorage.setItem('scores', JSON.stringify(storedScores));
+        setHighScore(score); // Update high score in the state
+      }
+    }
     }
   }, [playerId, score, updateHighScore]); // Trigger mutation when playerId or score changes
 
@@ -91,8 +109,8 @@ const GameOver = () => {
   }
 
   if (error) {
-    console.error(error);
-    return <p>Error saving high score!</p>;
+    console.log(error);
+    return <MessageDisplay error={error}/>;
   }
 
   return (
@@ -107,6 +125,15 @@ const GameOver = () => {
         <p>Loading high score...</p>
       )}
       </ScoreDiv>
+
+      <Buttons>
+      <div>
+        <HomeButton />
+      </div>
+      <div>
+        <RestartButton />
+      </div>
+      </Buttons>
     </Container>
     </Home>
   );
