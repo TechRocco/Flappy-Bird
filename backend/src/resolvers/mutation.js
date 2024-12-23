@@ -10,6 +10,7 @@ const Player = require('../models/Player');
 const GameSession = require('../models/GameSession');
 const Achievement = require('../models/Achievement');
 const { ApolloError } = require('apollo-server-express');
+const gravatar = require('../util/gravatar');
 
 
 
@@ -41,7 +42,7 @@ module.exports = {
             const user = await models.Player.create({
                 username,
                 email,
-                // avatar: gravatar(email), // Uncomment if you're using a gravatar URL generator
+                avatar: gravatar(email), // Uncomment if you're using a gravatar URL generator
                 password: hashedPassword
             });
 

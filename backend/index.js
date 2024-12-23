@@ -2,9 +2,9 @@ const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 require('dotenv').config();
 const mongoose = require("mongoose");
-const models = require('./models');
-const typeDefs = require('./schema');
-const resolvers = require('./resolvers');
+const models = require('./src/models');
+const typeDefs = require('./src/schema');
+const resolvers = require('./src/resolvers');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -44,8 +44,8 @@ const getUser = token => {
 
 async function startServer() {
     const app = express();
-    // app.use(helmet());
-    // app.use(cors());
+    app.use(helmet());
+    app.use(cors());
 
     // Apollo Server setup
     const server = new ApolloServer({
@@ -59,9 +59,7 @@ async function startServer() {
             const token = req.headers.authorization;
             // try to retrieve a user with the token
             const user = getUser(token);
-            // for now, let's log the user to the console:
-            console.log(user);
-            // add the db models and the user to the context
+           
             return { models, user };
         }
     });

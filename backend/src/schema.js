@@ -7,6 +7,7 @@ const typeDefs = gql`
         username: String
         email: String
         highScore: Int
+        avatar: String
         achievements: [Achievement!]!
     }
 

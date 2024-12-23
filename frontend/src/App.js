@@ -1,10 +1,8 @@
 import React from 'react';
-// import './App.css';
-import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink, } from '@apollo/client';
+import { ApolloClient, ApolloProvider, createHttpLink, } from '@apollo/client';
 //createHttpLink, setContext imported to access jwt and pass on every request
 import { setContext } from 'apollo-link-context';
 import cache from './cache';
-import GameScreen from './Screen/GameScreen';
 import Pages from './pages/index';
 import { ToastContainer } from "react-toastify";
 

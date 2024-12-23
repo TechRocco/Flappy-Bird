@@ -1,7 +1,7 @@
 import { useQuery, gql } from '@apollo/client';
 import styled from 'styled-components';
 import HighScoreFeed from '../components/HighscoreFeed';
-import React from 'react';
+import React, { useEffect } from 'react';
 import BackButton from '../components/BackButton';
 import { toast } from 'react-toastify';
 import { GET_LEADERBOARD } from '../gql/query';
@@ -77,6 +77,10 @@ const H1 = styled.h1`
 
 
 let Leaderboard = () => {
+
+  useEffect(() => {
+    document.title = 'Leaderboard — FlappyBird';
+  })
     const {loading, error, data} = useQuery(GET_LEADERBOARD);
     if (loading) {
         console.log('Loading...', loading);

@@ -14,7 +14,7 @@ const SignIn = () => {
     const [errorMessage, setErrorMessage] = useState(null);
     useEffect(() => {
         // update the document title
-        document.title = 'Sign In — Notedly';
+        document.title = 'Sign In — FlappyBird';
     });
     // const client = useApolloClient();
     const [signIn, { loading, error }] = useMutation(SIGNIN_USER, {
@@ -44,7 +44,7 @@ const SignIn = () => {
         <React.Fragment>
             
             {/* {loading && <p>Loading...</p>} */}
-            <UserForm action={signIn} formType="signIn" errorMessage={errorMessage} setErrorMessage={setErrorMessage}/>
+            <UserForm action={signIn} formType="signIn" />
             {/* if the data is loading, display a loading message*/}
             {/* if there is an error, display a error message*/}
         </React.Fragment>

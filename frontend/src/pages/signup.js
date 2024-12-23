@@ -36,7 +36,7 @@ const SignUp = () => {
 
     useEffect(() => {
         // update the document title
-        document.title = 'Sign Up — Notedly';
+        document.title = 'Sign Up — FlappyBird';
     });
     return (
         <React.Fragment>

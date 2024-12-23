@@ -70,12 +70,12 @@ const UserForm = props => {
                     <BackButton />
                 </div>
 
-                <div style={{position: 'relative', top: '50px', left: '0px'}}>
+                {/* <div style={{position: 'relative', top: '50px', left: '0px'}}>
                 {props.errorMessage && 
                             <Alert severity="error" onClose={() => props.setErrorMessage(null)}>
                                 {props.errorMessage}
                             </Alert>}
-                </div>
+                </div> */}
                 
                 <Wrapper>
                     {/* Display the appropriate form header */}

@@ -28,6 +28,7 @@ query{
     username
     highScore
     email
+    avatar
     achievements {
       id
       name

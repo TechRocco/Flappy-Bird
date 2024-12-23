@@ -41,8 +41,11 @@ const PlayerSchema = new mongoose.Schema({
     highScore: { 
         type: Number, 
         default: 0 
-
     },
+    avatar: {
+        type: String
+    },
+    
     achievements: [AchievementSchema]
 });
 

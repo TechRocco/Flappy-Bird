@@ -50,12 +50,13 @@
 
 // export default MyProfile;
 
-
-import React from "react";
-import { gql, useQuery } from '@apollo/client';
-import styled from 'styled-components';
+import React, { useEffect, useState } from "react";
+import { gql, useQuery } from "@apollo/client";
+import styled from "styled-components";
 import BackButton from "../components/BackButton";
 import { GET_PROFILE } from "../gql/query";
+import { toast } from "react-toastify";
+
 
 
 const Home = styled.div`
@@ -66,7 +67,7 @@ const Home = styled.div`
 `;
 
 const Container = styled.div`
-background-image: url("./images/background-day.png");
+  background-image: url("./images/background-day.png");
   background-repeat: no-repeat;
   background-size: 400px 600px;
   width: 400px;
@@ -76,7 +77,6 @@ background-image: url("./images/background-day.png");
   border: 2px solid black;
 `;
 
-// Styled components for the profile page layout
 const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -98,7 +98,7 @@ const Avatar = styled.img`
 `;
 
 const Heading = styled.h2`
-  color: #333;
+  color: white;
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 10px;
@@ -106,8 +106,8 @@ const Heading = styled.h2`
 
 const InfoItem = styled.div`
   font-size: 18px;
-  color: #333;
-  margin: 10px 0;
+  color: wheat;
+  margin: 5px 0;
   text-align: left;
   width: 100%;
   padding: 5px 0;
@@ -115,64 +115,138 @@ const InfoItem = styled.div`
 `;
 
 const AchievementsContainer = styled.div`
-  margin-top: 20px;
+  margin-top: 5px;
   width: 100%;
 `;
 
-const Achievement = styled.div`
-  background-color: rgba(0, 0, 0, 0.77);
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
-  border: 1px solid #00796b;
+const BadgeContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  
+`;
+
+const Badge = styled.div`
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+
+  &:hover::after {
+    content: '${(props) => props.level}';
+    position: absolute;
+    bottom: -30px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+`;
+
+const MedalIcon = styled.img`
+  width: 70px; /* Set to the same size as the circle */
+  height: 70px; /* Set to the same size as the circle */
+  border-radius: 50%;
+`;
+
+const Checkmark = styled.div`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  background-color: green;
   color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+const BadgeDescription = styled.div`
+  position: absolute;
+  top: 60px;
+  background-color: white;
+  color: black;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+  font-size: 12px;
 `;
 
 const MyProfile = () => {
-    const { loading, error, data } = useQuery(GET_PROFILE);
+  useEffect(() => {
+    document.title = `Profile — FlappyBird`;
+  })
+  const { loading, error, data } = useQuery(GET_PROFILE);
+  const [selectedBadge, setSelectedBadge] = useState(null);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error!</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error){
+    toast(`${error}`, {type: "error"});
+  }
 
-    return (
+  const handleBadgeClick = (description) => {
+    setSelectedBadge(description);
+    setTimeout(() => setSelectedBadge(null), 3000); // Hide after 3 seconds
+  };
+  
 
-      <Home>
-        <Container>
-        <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-                    <BackButton />
-                </div>
+  const highScore = data.me.highScore;
+
+  return (
+    <Home>
+      <Container>
+        <div style={{ position: 'relative', top: '20px', left: '20px' }}>
+          <BackButton />
+        </div>
         <ProfileContainer>
-            {/* Displaying user avatar */}
-            <Avatar src={data.me.avatar} alt="User Avatar" />
-
-            {/* Displaying username */}
-            <Heading>{data.me.username}</Heading>
-
-            {/* Displaying user email */}
-            <InfoItem>Email: {data.me.email}</InfoItem>
-
-            {/* Displaying highscore */}
-            <InfoItem>Highscore: {data.me.highScore}</InfoItem>
-
-            {/* Displaying achievements */}
-            <AchievementsContainer>
-                <h3>Achievements</h3>
-                {data.me.achievements.length > 0 ? (
-                    data.me.achievements.map((ach) => (
-                        <Achievement key={ach.id}>
-                            <p><strong>{ach.name}</strong></p>
-                            <p>{ach.description}</p>
-                            <p><em>Unlocked at: {ach.unlockedAt}</em></p>
-                        </Achievement>
-                    ))
-                ) : (
-                    <p>No achievements unlocked yet!</p>
-                )}
-            </AchievementsContainer>
+          <Avatar src={data.me.avatar} alt="User Avatar" />
+          <Heading>{data.me.username}</Heading>
+          <InfoItem>Email: {data.me.email}</InfoItem>
+          <InfoItem>Highscore: {data.me.highScore}</InfoItem>
+          <AchievementsContainer>
+            <h3>Achievements</h3>
+          </AchievementsContainer>
+          <BadgeContainer>
+            <Badge
+              level="Bronze"
+              onClick={() => handleBadgeClick("Bronze level unlocked at 5 points")}
+            >
+              <MedalIcon src={require("../assets/images/bronze-medal.png")} alt="Bronze Medal" />
+              {highScore >= 5 && <Checkmark>✓</Checkmark>}
+            </Badge>
+            <Badge
+              level="Silver"
+              onClick={() => handleBadgeClick("Silver level unlocked at 10 points")}
+            >
+              <MedalIcon src={require("../assets/images/silver-medal.png")} alt="Silver Medal" />
+              {highScore >= 10 && <Checkmark>✓</Checkmark>}
+            </Badge>
+            <Badge
+              level="Gold"
+              onClick={() => handleBadgeClick("Gold level unlocked at 15 points")}
+            >
+              <MedalIcon src={require("../assets/images/gold-medal.png")} alt="Gold Medal" />
+              {highScore >= 15 && <Checkmark>✓</Checkmark>}
+            </Badge>
+          </BadgeContainer>
+          {selectedBadge && <BadgeDescription>{selectedBadge}</BadgeDescription>}
         </ProfileContainer>
-        </Container>
-        </Home>
-    );
+      </Container>
+    </Home>
+  );
 };
 
 export default MyProfile;

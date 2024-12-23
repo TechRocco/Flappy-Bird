@@ -80,6 +80,7 @@ const GameOver = () => {
   // console.log(userdata.me.id);
 
   useEffect(() => {
+      document.title = 'GameOver — FlappyBird';
     const storedScores = JSON.parse(localStorage.getItem('scores')) || {};
     const username = localStorage.getItem('username') || 'Guest';
 

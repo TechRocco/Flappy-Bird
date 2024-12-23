@@ -114,6 +114,8 @@ const HomeScreen = () => {
   const [createOrUpdatePlayer] = useMutation(CREATE_OR_UPDATE_PLAYER);
 
   useEffect(() => {
+    document.title = 'Home — FlappyBird';
+
     const handleOnline = () => {
       setIsOffline(false);
       createPlayerAndSyncScores();
