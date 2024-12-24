@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
-import { useMutation, useApolloClient, gql } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import UserForm from '../Screen/UserForm';
 import { isLoggedInVar } from '../cache';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { SIGNUP_USER } from '../gql/mutation';
-
 
 
 // include the props passed to the component for later use
@@ -23,14 +22,11 @@ const SignUp = () => {
             isLoggedInVar(true);
             toast("Successfully Loged In", { type: "success" });
             
-            // client.writeData({ data: { isLoggedIn: true } });
-            // redirect the user to the homepage
             navigate('/');
         },
         onError: error => {
                     console.log(error);
-                    toast(`${error.message}`, { type: "error" });
-                            
+                    toast(`${error.message}`, { type: "error" });          
                 } 
     });
 

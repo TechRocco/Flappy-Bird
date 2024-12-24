@@ -1,5 +1,4 @@
 
-
 module.exports = {
     getPlayerAchievements: async (_, args, { models }) => {
         const player = await models.Player.findById(args.playerId);

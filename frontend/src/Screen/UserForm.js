@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Button from '../components/button';
 import BackButton from '../components/BackButton';
-import Alert from '@mui/material/Alert';
 
 
 const Home = styled.div`
@@ -69,13 +68,6 @@ const UserForm = props => {
                 <div style={{ position: 'relative', top: '20px', left: '20px' }}>
                     <BackButton />
                 </div>
-
-                {/* <div style={{position: 'relative', top: '50px', left: '0px'}}>
-                {props.errorMessage && 
-                            <Alert severity="error" onClose={() => props.setErrorMessage(null)}>
-                                {props.errorMessage}
-                            </Alert>}
-                </div> */}
                 
                 <Wrapper>
                     {/* Display the appropriate form header */}

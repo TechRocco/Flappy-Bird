@@ -18,7 +18,6 @@ module.exports = {
     signUp: async (parent, { username, email, password }, { models }) => {
         try {
             console.log("Input data:", { username, email, password });
-            // console.log("User schema:", models.User.schema);
 
             // Normalize email address
             email = email.trim().toLowerCase();
@@ -42,7 +41,7 @@ module.exports = {
             const user = await models.Player.create({
                 username,
                 email,
-                avatar: gravatar(email), // Uncomment if you're using a gravatar URL generator
+                avatar: gravatar(email), 
                 password: hashedPassword
             });
 
@@ -87,7 +86,7 @@ module.exports = {
       if (player) {
         if (score > player.highScore) {
           player.highScore = score;
-          await player.save();  // Save the updated player
+          await player.save();  
         }
       } else {
         player = await Player.create({ username, highScore: score, email, password });
@@ -110,26 +109,26 @@ module.exports = {
 
     startGame: async (_, { playerId }) => {
         try {
-          // Step 1: Check if the player exists
+          // Check if the player exists
           const player = await Player.findById(playerId);
           if (!player) {
             throw new ApolloError('Player not found', 'PLAYER_NOT_FOUND');
           }
   
-          // Step 2: Check if the player already has an active game session
+          // Check if the player already has an active game session
           const existingSession = await GameSession.findOne({ player: playerId, endTime: null });
           if (existingSession) {
             throw new ApolloError('Game session already in progress', 'GAME_ALREADY_STARTED');
           }
   
-          // Step 3: Create a new game session
+          // Create a new game session
           const session = new GameSession({
             player: playerId, // Store the player ID
             startTime: new Date().toISOString(),
-            score: 0, // Initialize score as 0 or another default value
+            score: 0, // Initialize score as 0 
           });
   
-          // Step 4: Save the session
+          // Save the session
           const savedSession = await session.save();
   
           // Return the saved session with player details populated
@@ -145,22 +144,22 @@ module.exports = {
 
       endGame: async (_, { sessionId, score }) => {
         try {
-          // Step 1: Fetch the game session
+          // Fetch the game session
           const session = await GameSession.findById(sessionId);
           if (!session) {
             throw new ApolloError('Game session not found', 'SESSION_NOT_FOUND');
           }
   
-          // Step 2: Check if the game is already ended
+          // Check if the game is already ended
           if (session.endTime) {
             throw new ApolloError('Game already ended', 'GAME_ALREADY_ENDED');
           }
   
-          // Step 3: Update the session with the score and end time
+          // Update the session with the score and end time
           session.score = score;
           session.endTime = new Date().toISOString();
   
-          // Step 4: Save the updated session
+          // Save the updated session
           const updatedSession = await session.save();
   
           // Return the updated session with player details populated
