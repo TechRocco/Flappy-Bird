@@ -180,9 +180,6 @@ const HomeScreen = () => {
           });
           console.log("Player created or updated:", response.data.createOrUpdatePlayer);
           
-          // After syncing, clear stored data
-          // localStorage.removeItem('scores');
-          // localStorage.removeItem('username');
         } catch (error) {
           console.error("Error creating or updating player:", error);
           toast("Leaderboard Updation Failed!", { type: "error" });

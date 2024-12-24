@@ -10,43 +10,35 @@ import Leaderboard from '../Screen/Leaderboard'
 import GameOver from '../Screen/GameOver';
 
 
-
-
 let Pages = () => {
     return (
-        
+
         <Router>
-            
-                <Routes>
-                    {/* public routes */}
-                    <Route exact path="/" element={<HomeScreen />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/signin" element={<SignIn />} />
 
-                    <Route path="/game" element={<GameScreen />} />
-
-                    {/* <Route path="/profile" element={<MyProfile />} /> */}
-
-                    <Route path="/Leaderboard" element={<Leaderboard />} />
-                    <Route path="/gameover" element={<GameOver />} />
+            <Routes>
+                {/* public routes */}
+                <Route exact path="/" element={<HomeScreen />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/Leaderboard" element={<Leaderboard />} />
+                <Route path="/gameover" element={<GameOver />} />
 
 
-
-                    {/* private routes */}
-                    <Route path="/profile" element={<PrivateRoute />}>
-                        <Route path="/profile" element={<MyProfile />} />
-                    </Route>
-                    {/* <Route path="/game" element={<PrivateRoute />}>
+                {navigator.onLine ? (
+                    <Route path="/game" element={<PrivateRoute />}>
                         <Route path="/game" element={<GameScreen />} />
                     </Route>
-                    <Route path="/leaderboard" element={<PrivateRoute />}>
-                        <Route path="/leaderboard" element={<Leaderboard />} />
-                    </Route>
-                    <Route path="/gameover" element={<PrivateRoute />}>
-                        <Route path="/gameover" element={<GameOver />} />
-                    </Route> */}
-                </Routes>
-           
+                ) : (
+                    <Route path="/game" element={<GameScreen />} />
+                )}
+
+                {/* private routes */}
+                <Route path="/profile" element={<PrivateRoute />}>
+                    <Route path="/profile" element={<MyProfile />} />
+                </Route>
+
+            </Routes>
+
         </Router>
     );
 }
